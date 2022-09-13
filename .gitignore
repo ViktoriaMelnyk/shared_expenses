@@ -1,0 +1,14 @@
+# Default ignored files
+/workspace.xml
+
+# Django #
+*.log
+*.pot
+*.pyc
+__pycache__
+
+# If you are using PyCharm # 
+.idea
+
+# cache
+__pycache__
