@@ -1,0 +1,73 @@
+{% extends 'main.html' %}
+{% load static %}
+{% block content %}
+
+<section class="expence">
+    <div class="main__wrapper">
+        <form method="POST" action="" class="form">
+            {% csrf_token %}
+            <div class="left__content">
+                <div class="form__title">Expence</div>
+
+                <div class="form__item">
+
+                    <div class="form__group">
+                        <label> Title</label>
+                        {{form.title}}
+                    </div>
+                    <div class="form__group">
+                        {{form.price}}
+                        <label>Price</label>
+                    </div>
+                    <div class="form__group">
+                        <label> Date</label>
+                        {{form.paid_date}}
+                    </div>
+                </div>
+                <div class="form__item">
+
+                    <div class="form__box">
+                        <div class="form__group tooltip">
+                            <span class="tooltiptext">Paid by</span>
+                            {{form.paid_by}}
+                        </div>
+                    </div>
+
+                    <div class="form__box">
+                        <div class="input__title">Split with</div>
+                        <div class="form__menu groups__menu">
+                            {{form.split_with}}
+                        </div>
+                    </div>
+
+                </div>
+                <div class="form__item comment">
+                    <div class="form__group comment__group">
+                        <label> Comment</label>
+                        {{form.comment}}
+                    </div>
+                </div>
+            </div>
+
+            <div class="right__content">
+                <a class="custom-icon exit" href="{% url 'detail' group_id %}" style="background-image: url({% static 'media/x.svg' %});"></a>
+                <div class="expence__img" style="background-image: url({% static 'media/Teamwork.png' %});"></div>
+                <button type="submit" class="custom__btn">Submit</button>
+
+            </div>
+        </form>
+        {% if expense_comments %}
+        <div class="main__content-item">
+            <div class="item__title"> Comments</div>
+            <ul>
+                {% for comment in expense_comments %}
+                <li><span>{{comment.created_by}}: </span>{{comment.comment_text}}</li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+
+    </div>
+</section>
+
+{% endblock %}
