@@ -1,0 +1,123 @@
+{% extends 'main.html' %}
+{% load static %}
+{% block content %}
+
+<section class="main">
+    <div class="main__wrapper">
+        <aside class="side__bar">
+            <ul>
+                <li class="form__li">
+                    <form action="" class="search__form">
+                    <input type="text" placeholder = "Search group ...">
+                    <button type="submit"><img src="{% static 'media/search.png' %}" alt=""></button>
+                    </form>
+                 </li>
+                {% for group in user_groups %}
+                    {% if current_group_id == group.id %}
+                        <li>
+                            <span class="active"></span>
+                            <a href="{% url 'detail' group.id %}" class="groups__a">{{group}}</a>
+                        </li>
+                    {% else %}
+                        <li><a href="{% url 'detail' group.id %}"class="groups__a">{{group.name}}</a></li>
+                    {% endif %}
+                {% endfor %}
+            </ul>
+        </aside>
+        <div class="main__content">
+            <div class="main__content-item balances">
+                <div class="item__title">Balances</div>
+                <ul class="balances">
+                    {% for user in group_users %}
+                        {% if user.balance < 0 %}
+                            <li>
+                                <span>{{user.profile.username}}:</span> {{user.balance|stringformat:"g"}} zł
+                            </li>
+                        {% else %}
+                            <li class="green">
+                                <span>{{user.profile.username}}:</span> {{user.balance|stringformat:"g"}} zł
+                            </li>
+                        {% endif %}
+                    {% endfor %}
+                </ul>
+            </div>
+            <div class="group__det">
+               <div class="item__header">
+                    <div class="item__header-title">{{group_data.name}}</div>
+                    <div class="buttons__box">
+                        <button onclick="location.href='/group/add-expense/'" type="button">Add EXP</button>
+                        <button onclick="location.href='/group/settle-up/'" type="button">Settle Up</button>
+                    </div>
+                </div>
+                <table class="main__table">
+                    {% for expense in group_expenses %}
+                        <tr class="row">
+                            <td>{{expense.paid_date|date:'d.m'}}</td>
+                            <td>{{expense.title}}</td>
+                            <td>{{expense.price|stringformat:"g"}} zł</td>
+
+                            <td class="cell">
+                                <button class="custom-icon"
+                                        onclick="location.href='{% url 'expense' expense.id %}'"
+                                        style="background-image: url({% static 'media/edit-2.svg' %});">
+                                </button>
+                            </td>
+
+                            <td class="cell">
+                                <button class="custom-icon"
+                                        onclick="location.href='{% url 'delete-expense' expense.id %}'"
+                                        style="background-image: url({% static 'media/trash-2.svg' %});">
+                                </button>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </table>
+
+                {% if group_expenses.has_other_pages %}
+                    <div class="container">
+                        <ul class="pagination">
+                            {% if group_expenses.has_previous %}
+                                <li><a href="?page={{group_expenses.previous_page_number}}" data-page="{{page}}" class="arrow" style="background-image: url({% static 'media/chevron-left.svg' %});"></a></li>
+                            {% endif %}
+
+                            {% for page in custom_range %}
+                                {% if page == group_expenses.number %}
+                                    <li class="current__page"><a href=href="?page={{page}}" data-page="{{page}}">{{page}}</a></li>
+                                {% else %}
+                                    <li><a href="?page={{page}}" data-page="{{page}}">{{page}}</a></li>
+                                {% endif %}
+                            {% endfor %}
+
+                            {% if group_expenses.has_next %}
+                                <li><a href="?page={{group_expenses.next_page_number}}" data-page="{{page}}" class="arrow" style="background-image: url({% static 'media/chevron-right.svg' %});"></a></li>
+                            {% endif %}
+                        </ul>
+                    </div>
+                {% endif %}
+
+            </div>
+            <div class="main__content-item balances">
+                <div class="item__title">Money Transfers</div>
+                <ul class="balances">
+                 {% for user in group_users %}
+                    {% for transfer in cash_transfers %}
+                        {% if transfer.sender == user %}
+                            <li>
+                                <span>{{transfer.sender.profile.username}} </span>
+                                owes {{transfer.amount|stringformat:"g"}} zł to {{transfer.receiver.profile.username}}
+                            </li>
+                        {% elif transfer.receiver == user %}
+                            <li class="green">
+                                <span>{{transfer.receiver.profile.username}} </span>
+                                gets back {{transfer.amount|stringformat:"g"}} zł from {{transfer.sender.profile.username}}
+                            </li>
+                        {% endif %}
+                    {% endfor %}
+                {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+</section>
+
+{% endblock %}

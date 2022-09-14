@@ -23,5 +23,6 @@ urlpatterns = [
     path('', WelcomePage.as_view(), name='welcome'),
 
     path('accounts/', include('users.urls')),
+    path('group/', include('groups.urls')),
 
 ]
