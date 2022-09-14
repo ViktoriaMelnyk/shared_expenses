@@ -1,0 +1,42 @@
+{% extends 'main.html' %}
+{% load static %}
+{% block content %}
+
+<section class="editProfile">
+        <div class="main__wrapper">
+
+                <form method="POST" class="form">
+                    {% csrf_token %}
+                    <div class="left__content">
+                    <div class="form__title">Edit your profile</div>
+                    <div class="form__item">
+                        <div class="form__group">
+                            <label id="email">Email</label>
+                            {{form.email}}
+                        </div>
+                        <div class="form__group">
+                            {{form.full_name}}
+                            <label id="full_name">Name</label>
+                        </div>
+                    </div>
+                    <div class="form__item">
+                        <div class="form__group avatar">
+                          <label for="file-upload" class="custom__upload">
+                             Upload your avatar
+                          </label>
+                          <input id="file-upload" type="file"/>
+                        </div>
+
+                      </div>
+                    </div>
+                    <div class="right__content">
+                        <a class="custom-icon exit" href="#" style="background-image: url({% static 'media/x.svg' %});"></a>
+                        <div class="expence__img edit_exp" style="background-image: url({% static 'media/soc_media.png' %})"></div>
+                        <button type="submit" class="custom__btn">Update</button>
+                    </div>
+                </form>
+        </div>
+
+    </section>
+
+{% endblock %}

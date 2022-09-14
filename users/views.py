@@ -1,6 +1,6 @@
 from django.contrib.auth.views import LoginView, LogoutView
 from django.urls import reverse_lazy
-from django.views.generic import CreateView, TemplateView
+from django.views.generic import CreateView, UpdateView, TemplateView
 from users.forms import LoginForm, SignUpForm, ProfileForm
 from .models import Profile
 from groups.models import Group
@@ -57,3 +57,20 @@ class SignUp(CreateView):
         login(self.request, self.object)
 
         return valid
+
+
+@method_decorator(login_required, name='dispatch')
+class ProfileView(UpdateView):
+    model = Profile
+    form_class = ProfileForm
+    template_name = 'users/details.html'
+
+    def get_success_url(self):
+        group_id = self.request.session.get('group_id')
+        return f'/group/{group_id}'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['logged_user'] = self.request.user.profile
+        context['group_id'] = self.request.session.get('group_id')
+        return context
