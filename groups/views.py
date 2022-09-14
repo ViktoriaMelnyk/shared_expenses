@@ -1,5 +1,5 @@
 from django.views.generic.detail import DetailView
-from django.views.generic.edit import CreateView
+from django.views.generic.edit import CreateView, UpdateView, DeleteView
 
 from django.urls import reverse
 from django.http import HttpResponseRedirect
@@ -127,6 +127,90 @@ class ExpenseCreateView(CreateView):
             expense_form.save_m2m()
 
         return HttpResponseRedirect(reverse('detail', args=[str(expense.group.id)]))
+
+    def get_success_url(self):
+        group_id = self.request.session.get('group_id')
+        return f'/group/{group_id}'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['group_id'] = self.request.session.get('group_id')
+        context['logged_user'] = self.request.user.profile
+        context['nav_groups'] = Group.objects.filter(profile=self.request.user.profile)[:4]
+        return context
+
+
+@method_decorator(login_required, name='dispatch')
+class ExpenseUpdateView(UpdateView):
+    model = Expense
+    form_class = ExpenseForm
+    template_name = 'groups/expense.html'
+
+    def get_form(self, *args, **kwargs):
+        group_id = self.request.session.get('group_id')
+        group = Group.objects.get(id=group_id)
+        group_users = GroupUser.objects.filter(group=group)
+
+        # check permission
+        expense_group = Expense.objects.get(id=self.kwargs['pk']).group
+        expense_group_users = expense_group.groupuser_set.all()
+        if GroupUser.objects.get(group=group, profile=self.request.user.profile) not in expense_group_users:
+            raise PermissionDenied("You can't edit the expense")
+
+        form = super().get_form(*args, **kwargs)
+
+        # limit only to current group users
+        form.fields['paid_by'].queryset = group_users
+        form.fields['split_with'].queryset = group_users
+        return form
+
+    def form_valid(self, form):
+        expense = form.save(commit=False)
+
+        if expense.comment:
+            ExpenseComment.objects.create(
+                group=expense.group,
+                created_by=expense.created_by,
+                comment_text=expense.comment,
+                expense=expense
+            )
+            expense.comment = None
+
+        expense.save()
+        form.save_m2m()
+
+        expense.group.last_update = datetime.now()
+        expense.group.save()
+
+        return HttpResponseRedirect(reverse('detail', args=[str(expense.group.id)]))
+
+    def get_success_url(self):
+        group_id = self.request.session.get('group_id')
+        return f'/group/{group_id}'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['expense_comments'] = ExpenseComment.objects.filter(expense_id=self.kwargs['pk'])
+        context['group_id'] = self.request.session.get('group_id')
+        context['logged_user'] = self.request.user.profile
+        context['nav_groups'] = Group.objects.filter(profile=self.request.user.profile)[:4]
+        return context
+
+
+@method_decorator(login_required, name='dispatch')
+class ExpenseDeleteView(DeleteView):
+    model = Expense
+
+    def dispatch(self, request, *args, **kwargs):
+        group_id = self.request.session.get('group_id')
+        group = Group.objects.get(id=group_id)
+
+        # check permission
+        expense_group = Expense.objects.get(id=self.kwargs['pk']).group
+        expense_group_users = expense_group.groupuser_set.all()
+        if GroupUser.objects.get(group=group, profile=self.request.user.profile) not in expense_group_users:
+            raise PermissionDenied("You can't edit the expense")
+        return super(ExpenseDeleteView, self).dispatch(request, *args, **kwargs)
 
     def get_success_url(self):
         group_id = self.request.session.get('group_id')
