@@ -6,6 +6,7 @@
 *.pot
 *.pyc
 __pycache__
+db.sqlite3
 
 # If you are using PyCharm # 
 .idea

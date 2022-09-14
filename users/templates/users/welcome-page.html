@@ -18,7 +18,7 @@
             <h1>Welcome to SLASH</h1>
 
             {% if group %}
-                <a href="#" class="custom__btn">Go to my groups</a>
+                <a href="{% url 'detail' group.id %}" class="custom__btn">Go to my groups</a>
             {% else %}
                 <a href="#" class="custom__btn">Go to my groups</a>
             {% endif %}
