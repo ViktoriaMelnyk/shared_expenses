@@ -1,0 +1,54 @@
+{% extends 'main.html' %}
+{% load static %}
+{% block content %}
+
+<section class="settle__up">
+    <div class="main__wrapper">
+        <form method="POST" class="form settle__up-form" style="background-image: url({% static 'media/settle-up.png' %});">
+            {% csrf_token %}
+            <a class="custom-icon exit" href="{% url 'detail' group_id %}" style="background-image: url({% static 'media/x.svg' %});"></a>
+            <div class="form__title">Settle Up</div>
+
+            <div class="form__item" style="border-bottom: none;">
+                <div class="form__box">
+                    <div class="form__group tooltip">
+                        <span class="tooltiptext">From</span>
+                        {{form.paid_by}}
+                    </div>
+                </div>
+
+                <div class="form__box">
+                    <div class="form__group tooltip">
+                        <span class="tooltiptext">To</span>
+                        {{form.paid_to}}
+                    </div>
+                </div>
+            </div>
+
+            <div class="form__item" style="border-bottom: none;">
+                <div class="form__group">
+                    <label for="amount">Amount</label>
+                    {{form.price}}
+                </div>
+                <div class="form__group">
+                    {{form.paid_date}}
+                    <label for="date">Date</label>
+                </div>
+            </div>
+
+            <button type="submit" class="custom__btn" style="margin-top: 40px;">Settle Up</button>
+
+        </form>
+    </div>
+
+</section>
+
+{% endblock %}
+
+<h2>Expense</h2>
+<form method="POST">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Settle Up</button>
+</form>
+<a href="{% url 'detail' group_id %}">Back to group</a>

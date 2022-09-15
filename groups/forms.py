@@ -1,5 +1,5 @@
 from django import forms
-from .models import Expense
+from .models import Expense, GroupUser
 
 
 class ExpenseForm(forms.ModelForm):
@@ -17,4 +17,21 @@ class ExpenseForm(forms.ModelForm):
         ]
         widgets = {
             'split_with': forms.CheckboxSelectMultiple(),
+        }
+
+
+class SettleUpForm(forms.ModelForm):
+    paid_to = forms.ModelChoiceField(queryset=GroupUser.objects.all())
+
+    class Meta:
+        model = Expense
+        fields = [
+            'price',
+            'paid_date',
+            'paid_by',
+            'paid_to',
+        ]
+
+        labels = {
+            'price': 'Gave back',
         }

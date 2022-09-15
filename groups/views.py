@@ -8,9 +8,10 @@ from django.core.exceptions import PermissionDenied
 
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
+from django.db.models import Q
 
 from groups.models import *
-from .forms import ExpenseForm
+from .forms import ExpenseForm, SettleUpForm
 
 from datetime import datetime
 
@@ -211,6 +212,68 @@ class ExpenseDeleteView(DeleteView):
         if GroupUser.objects.get(group=group, profile=self.request.user.profile) not in expense_group_users:
             raise PermissionDenied("You can't edit the expense")
         return super(ExpenseDeleteView, self).dispatch(request, *args, **kwargs)
+
+    def get_success_url(self):
+        group_id = self.request.session.get('group_id')
+        return f'/group/{group_id}'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['group_id'] = self.request.session.get('group_id')
+        context['logged_user'] = self.request.user.profile
+        context['nav_groups'] = Group.objects.filter(profile=self.request.user.profile)[:4]
+        return context
+
+
+@method_decorator(login_required, name='dispatch')
+class SettleUpView(CreateView):
+    model = Expense
+    form_class = SettleUpForm
+    template_name = 'groups/settle-up.html'
+
+    def get_form(self, *args, **kwargs):
+        group_id = self.request.session.get('group_id')
+        group = Group.objects.get(id=group_id)
+
+        form = super().get_form(*args, **kwargs)
+        group_users = GroupUser.objects.filter(group=group)
+        logged_grp_user = GroupUser.objects.get(group=group, profile=self.request.user.profile)
+        # limit only to current group users
+        form.fields['paid_by'].queryset = group_users
+        form.fields['paid_to'].queryset = group_users
+        # pre_fill form
+        related_transfers = TransferToMake.objects.filter(Q(sender=logged_grp_user) | Q(receiver=logged_grp_user))
+        first_transfer = related_transfers.first()
+        if first_transfer is None:
+            first_transfer = TransferToMake.objects.filter(group=group).first()
+        if first_transfer is not None:
+            form.fields['paid_date'].initial = datetime.now().strftime('%Y-%m-%d %H:%M')
+            form.fields['paid_by'].initial = first_transfer.sender
+            form.fields['paid_to'].initial = first_transfer.receiver
+            form.fields['price'].initial = first_transfer.amount
+        return form
+
+    def post(self, request, **kwargs):
+        settlement_form = SettleUpForm(request.POST)
+        group_id = self.request.session.get('group_id')
+        group = Group.objects.get(id=group_id)
+
+        if settlement_form.is_valid():
+            settlement = settlement_form.save(commit=False)
+            settlement.group = group
+            settlement.created_by = GroupUser.objects.get(group=group, profile=self.request.user.profile)
+
+            paid_to = settlement_form.cleaned_data.get('paid_to')
+            settlement.title = f'{settlement.paid_by} gave back {settlement.price} to {paid_to}'
+
+            settlement.save()
+            settlement.split_with.set([paid_to])
+            settlement_form.save_m2m()
+
+            group.last_update = datetime.now()
+            group.save()
+
+            return HttpResponseRedirect(reverse('detail', args=[str(settlement.group.id)]))
 
     def get_success_url(self):
         group_id = self.request.session.get('group_id')
