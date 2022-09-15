@@ -12,6 +12,7 @@ from django.db.models import Q
 
 from groups.models import *
 from .forms import ExpenseForm, SettleUpForm
+from .utils import track_cash_movements
 
 from datetime import datetime
 
@@ -127,6 +128,8 @@ class ExpenseCreateView(CreateView):
 
             expense_form.save_m2m()
 
+            track_cash_movements(expense, expense.split_with.all())
+
         return HttpResponseRedirect(reverse('detail', args=[str(expense.group.id)]))
 
     def get_success_url(self):
@@ -166,6 +169,11 @@ class ExpenseUpdateView(UpdateView):
         return form
 
     def form_valid(self, form):
+        old_expense = Expense.objects.get(id=self.kwargs['pk'])
+        old_price = old_expense.price
+        old_lender = old_expense.paid_by
+        old_borrowers = list(old_expense.split_with.all())
+
         expense = form.save(commit=False)
 
         if expense.comment:
@@ -182,6 +190,26 @@ class ExpenseUpdateView(UpdateView):
 
         expense.group.last_update = datetime.now()
         expense.group.save()
+
+        '''
+        CHECK IF THERE IS same_price, same_lander, same_borrowers AFTER THE UPDATE
+        TO EVALUATE IF THE BALANCE RECALCULATION OF GROUP USERS IS REQUIRED
+        '''
+        same_price = expense.price == old_price
+        same_lander = expense.paid_by == old_lender
+        same_borrowers = list(expense.split_with.all()) == old_borrowers
+
+        if not same_price or not same_lander or not same_borrowers:
+            cash_movements = CashMovement.objects.filter(expense=old_expense)
+            # revert balance changes caused by the expense
+            for balance_change in cash_movements:
+                balance_change.group_user.balance = balance_change.group_user.balance - balance_change.balance_impact
+                balance_change.group_user.save()
+                balance_change.delete()
+
+            updated_borrowers = expense.split_with.all()
+
+            track_cash_movements(expense, updated_borrowers)
 
         return HttpResponseRedirect(reverse('detail', args=[str(expense.group.id)]))
 
@@ -272,6 +300,8 @@ class SettleUpView(CreateView):
 
             group.last_update = datetime.now()
             group.save()
+
+            track_cash_movements(settlement, settlement.split_with.all())
 
             return HttpResponseRedirect(reverse('detail', args=[str(settlement.group.id)]))
 
