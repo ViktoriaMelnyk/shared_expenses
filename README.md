@@ -1,17 +1,17 @@
 (🔴 Projekt jest w fazie rozwoju)
 
-#Wstęp
+# Wstęp
 SLASH jest aplikacją webową zbudowaną za pomocą Python frameworku Django. Głównym celem tej aplikacji jest śledzenie wydatków i zobowiązań finansowych pomiędzy użytkownikami grupy.
 
 ---
-###Funkcjonalności:
+### Funkcjonalności:
 - Rejestracja/Logowanie/Wylogowanie
 - CRUD (create/read/update/delete) wydatków
 - Śledzenie sald użytkowników
 - Organizacja przelewów pieniężnych
 - Tworzenie/usuwanie grup (`🔴 - niedostępne w tej wersji`)
 
-###Logowanie/Rejestracja
+### Logowanie/Rejestracja
 ![](readme/login.gif)
 
 ### Tworzenie wydatku
@@ -20,12 +20,12 @@ SLASH jest aplikacją webową zbudowaną za pomocą Python frameworku Django. G�
 ### Edytowanie wydatku
 ![](readme/edit-expense.gif)
 
-###Rozliczenie
+### Rozliczenie
 W celu rozliczenia swoich zaległości użytkownik ma możliwość użyć funkcji "settle-up". 
 Po wcisnięciu przycisku "Settle-up" ładuje się Django formularz z wstępnie uzupełnionymi danymi na podstawie modelu "TransferToMake".
 ![](readme/settle-up.gif)
 
-###Szczegóły frameworku Django
+### Szczegóły frameworku Django
 Ten projekt jest wykonany przy użyciu widoków opartych na klasach (Class based views) i dzieli się na dwie aplikacje: "users" i "groups".
 
 **Aplikacja "users"** odpowiada za:
