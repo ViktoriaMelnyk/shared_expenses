@@ -7,5 +7,6 @@ urlpatterns = [
     path('expense/<str:pk>/delete', views.ExpenseDeleteView.as_view(), name="delete-expense"),
     path('settle-up/', views.SettleUpView.as_view(), name="settle-up"),
 
+    path('create/', views.GroupCreateView.as_view(), name="create"),
     path('<str:pk>/', views.GroupDetailView.as_view(), name="detail"),
 ]

@@ -11,12 +11,51 @@ from django.utils.decorators import method_decorator
 from django.db.models import Q
 
 from groups.models import *
-from .forms import ExpenseForm, SettleUpForm
+from .forms import ExpenseForm, SettleUpForm, GroupForm
 from .utils import track_cash_movements
 
 from datetime import datetime
 
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
+
+
+@method_decorator(login_required, name='dispatch')
+class GroupCreateView(CreateView):
+    model = Group
+    form_class = GroupForm
+    template_name = 'groups/group-create.html'
+
+    def get_form(self, *args, **kwargs):
+        form = super().get_form(*args, **kwargs)
+        return form
+
+    def post(self, request, **kwargs):
+        group_form = GroupForm(request.POST)
+        if group_form.is_valid():
+            group = group_form.save(commit=False)
+            group.created_by =self.request.user.profile
+            group.created_at = datetime.now()
+            group.last_update = group.created_at
+
+            group.save()
+
+            GroupUser.objects.create(
+                group=group,
+                balance=0,
+                profile=self.request.user.profile
+            )
+        return HttpResponseRedirect(reverse('detail', args=[str(group.id)]))
+
+    def get_success_url(self):
+        group_id = self.request.session.get('group_id')
+        return f'/group/{group_id}'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['group_id'] = self.request.session.get('group_id')
+        context['logged_user'] = self.request.user.profile
+        context['nav_groups'] = Group.objects.filter(profile=self.request.user.profile)[:4]
+        return context
 
 
 @method_decorator(login_required, name='dispatch')

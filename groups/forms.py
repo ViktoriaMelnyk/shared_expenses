@@ -1,5 +1,14 @@
 from django import forms
-from .models import Expense, GroupUser
+from .models import Expense, GroupUser, Group
+
+
+class GroupForm(forms.ModelForm):
+
+    class Meta:
+        model = Group
+        fields = [
+            'name',
+        ]
 
 
 class ExpenseForm(forms.ModelForm):
