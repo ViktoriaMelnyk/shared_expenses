@@ -1,7 +1,7 @@
 from django.views.generic.detail import DetailView
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 
-from django.urls import reverse
+from django.urls import reverse, reverse_lazy
 from django.http import HttpResponseRedirect
 
 from django.core.exceptions import PermissionDenied
@@ -53,6 +53,33 @@ class GroupCreateView(CreateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['group_id'] = self.request.session.get('group_id')
+        context['logged_user'] = self.request.user.profile
+        context['nav_groups'] = Group.objects.filter(profile=self.request.user.profile)[:4]
+        return context
+
+
+@method_decorator(login_required, name='dispatch')
+class GroupDeleteView(DeleteView):
+    model = Group
+
+    def dispatch(self, request, *args, **kwargs):
+        group_id = self.request.session.get('group_id')
+        group = Group.objects.get(id=group_id)
+
+        # check permission
+        group_users = group.groupuser_set.all()
+        if GroupUser.objects.get(group=group, profile=self.request.user.profile) not in group_users:
+            raise PermissionDenied("You can't delete the group")
+        return super(GroupDeleteView, self).dispatch(request, *args, **kwargs)
+
+    def get_success_url(self):
+        return reverse_lazy('welcome')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        group = Group.objects.get(id=self.request.session.get('group_id'))
+        context['group_id'] = group.id
+        context['group_name'] = group.name
         context['logged_user'] = self.request.user.profile
         context['nav_groups'] = Group.objects.filter(profile=self.request.user.profile)[:4]
         return context
@@ -281,8 +308,7 @@ class ExpenseDeleteView(DeleteView):
         return super(ExpenseDeleteView, self).dispatch(request, *args, **kwargs)
 
     def get_success_url(self):
-        group_id = self.request.session.get('group_id')
-        return f'/group/{group_id}'
+        return reverse_lazy('welcome')
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

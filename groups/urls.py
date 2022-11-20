@@ -9,4 +9,5 @@ urlpatterns = [
 
     path('create/', views.GroupCreateView.as_view(), name="create"),
     path('<str:pk>/', views.GroupDetailView.as_view(), name="detail"),
+    path('<str:pk>/delete', views.GroupDeleteView.as_view(), name="delete"),
 ]
