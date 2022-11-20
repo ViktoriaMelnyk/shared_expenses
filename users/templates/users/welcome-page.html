@@ -19,11 +19,9 @@
 
             {% if group %}
                 <a href="{% url 'detail' group.id %}" class="custom__btn">Go to my groups</a>
-            {% else %}
-                <a href="#" class="custom__btn">Go to my groups</a>
             {% endif %}
 
-            <a href="#" class="custom__btn">Create new group</a>
+            <a href="{% url 'create' %}" class="custom__btn">Create new group</a>
             </div>
         <div class="welcome__img" style="background-image: url({% static 'media/welcome.png' %});"></div>
         </div>
