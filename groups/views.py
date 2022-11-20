@@ -86,6 +86,39 @@ class GroupDeleteView(DeleteView):
 
 
 @method_decorator(login_required, name='dispatch')
+class GroupUpdateView(UpdateView):
+    model = Group
+    form_class = GroupForm
+    template_name = 'groups/group-create.html'
+
+    def get_form(self, *args, **kwargs):
+        group_id = self.request.session.get('group_id')
+        group = Group.objects.get(id=group_id)
+        group_users = GroupUser.objects.filter(group=group)
+
+        if GroupUser.objects.get(group=group, profile=self.request.user.profile) not in group_users:
+            raise PermissionDenied("You can't edit this group")
+
+        form = super().get_form(*args, **kwargs)
+
+        # limit only to current group users
+        #form.fields['paid_by'].queryset = group_users
+        #form.fields['split_with'].queryset = group_users
+        return form
+
+    def get_success_url(self):
+        group_id = self.request.session.get('group_id')
+        return f'/group/{group_id}'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['group_id'] = self.request.session.get('group_id')
+        context['logged_user'] = self.request.user.profile
+        context['nav_groups'] = Group.objects.filter(profile=self.request.user.profile)[:4]
+        return context
+
+
+@method_decorator(login_required, name='dispatch')
 class GroupDetailView(DetailView):
     model = Group
     template_name = 'groups/group.html'
