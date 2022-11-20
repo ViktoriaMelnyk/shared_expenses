@@ -21,6 +21,9 @@
             </div>
             <div class="right__content">
             <button type="submit" class="custom__btn">Submit</button>
+                {% if object %}
+                    <a href="{% url 'delete' group.id %}" class="custom__btn" style="background: #F15634;">Delete group</a>
+                {% endif %}
             </div>
         </form>
 
