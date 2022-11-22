@@ -6,7 +6,7 @@ from datetime import datetime
 
 class Group(models.Model):
     id = models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, unique=True)
-    created_by = models.ForeignKey(Profile, related_name='created_by', null=True, on_delete=models.CASCADE)
+    created_by = models.ForeignKey(Profile, related_name='created_by', null=True, on_delete=models.SET_NULL)
     created_at = models.DateTimeField(auto_now_add=True)
     name = models.CharField(null=True, max_length=100)
     group_users = models.ManyToManyField(Profile, through='GroupUser')
@@ -28,7 +28,7 @@ class GroupUser(models.Model):
 
 class TransferToMake(models.Model):
     id = models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, unique=True)
-    sender = models.ForeignKey(GroupUser, related_name='borrower', on_delete=models.CASCADE, blank=True)
+    sender = models.ForeignKey(GroupUser, related_name='borrower', on_delete=models.SET_NULL, blank=True, null=True)
     amount = models.FloatField(blank=True)
     receiver = models.ForeignKey(GroupUser, on_delete=models.CASCADE, blank=True)
     group = models.ForeignKey(Group, on_delete=models.CASCADE, blank=True, null=True)
@@ -43,9 +43,9 @@ class Expense(models.Model):
     price = models.FloatField(null=True)
     group = models.ForeignKey(Group, null=True, on_delete=models.CASCADE)
     paid_date = models.DateTimeField(default=datetime.now(), null=True)
-    paid_by = models.ForeignKey(GroupUser, related_name='paid_by', on_delete=models.CASCADE, null=True)
+    paid_by = models.ForeignKey(GroupUser, related_name='paid_by', on_delete=models.SET_NULL, null=True)
     split_with = models.ManyToManyField(GroupUser, related_name='expense_split')
-    created_by = models.ForeignKey(GroupUser, on_delete=models.CASCADE, null=True)
+    created_by = models.ForeignKey(GroupUser, on_delete=models.SET_NULL, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     comment = models.TextField(max_length=500, null=True, blank=True)
@@ -57,7 +57,7 @@ class Expense(models.Model):
 class ExpenseComment(models.Model):
     id = models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, unique=True)
     group = models.ForeignKey(Group, null=True, on_delete=models.CASCADE)
-    created_by = models.ForeignKey(GroupUser, on_delete=models.CASCADE, null=True)
+    created_by = models.ForeignKey(GroupUser, on_delete=models.SET_NULL, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     comment_text = models.TextField(max_length=250, null=True, blank=True)
 
@@ -66,6 +66,6 @@ class ExpenseComment(models.Model):
 
 class CashMovement(models.Model):
     id = models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, unique=True)
-    group_user = models.ForeignKey(GroupUser, on_delete=models.CASCADE, null=True)
+    group_user = models.ForeignKey(GroupUser, on_delete=models.SET_NULL, null=True)
     expense = models.ForeignKey(Expense, on_delete=models.CASCADE, blank=True, null=True)
     balance_impact = models.FloatField(null=True)

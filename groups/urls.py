@@ -7,6 +7,8 @@ urlpatterns = [
     path('expense/<str:pk>/delete', views.ExpenseDeleteView.as_view(), name="delete-expense"),
     path('settle-up/', views.SettleUpView.as_view(), name="settle-up"),
 
+    path('delete-groupuser/<str:pk>', views.DeleteGroupUserView.as_view(), name="delete-groupuser"),
+
     path('create/', views.GroupCreateView.as_view(), name="create"),
     path('<str:pk>/', views.GroupDetailView.as_view(), name="detail"),
     path('<str:pk>/delete', views.GroupDeleteView.as_view(), name="delete"),

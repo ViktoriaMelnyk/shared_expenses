@@ -31,13 +31,12 @@
                     {% for user in group_users %}
                         {% if user.balance < 0 %}
                             <li>
-                                <span>{{user.profile.username}}:</span> {{user.balance|stringformat:"g"}} zł
-                            </li>
                         {% else %}
                             <li class="green">
+                        {% endif %}
+                                <a href="{% url 'delete-groupuser' user.id %}" class="groups__a">x</a>
                                 <span>{{user.profile.username}}:</span> {{user.balance|stringformat:"g"}} zł
                             </li>
-                        {% endif %}
                     {% endfor %}
                 </ul>
             </div>

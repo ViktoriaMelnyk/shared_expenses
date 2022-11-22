@@ -212,6 +212,35 @@ class GroupInvite(DetailView):
 
 
 @method_decorator(login_required, name='dispatch')
+class DeleteGroupUserView(DeleteView):
+    model = GroupUser
+
+    def dispatch(self, request, *args, **kwargs):
+        group_id = self.request.session.get('group_id')
+        group = Group.objects.get(id=group_id)
+
+        # check permission
+        group_users = group.groupuser_set.all()
+        if GroupUser.objects.get(group=group, profile=self.request.user.profile) not in group_users:
+            raise PermissionDenied("You can't access this page")
+        return super(DeleteGroupUserView, self).dispatch(request, *args, **kwargs)
+
+    def post(self, request, **kwargs):
+        GroupUser.objects.get(id=self.kwargs['pk']).delete()
+        return HttpResponseRedirect(reverse('welcome'))
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        group = Group.objects.get(id=self.request.session.get('group_id'))
+        context['group_id'] = group.id
+        context['group_name'] = group.name
+        context['group_user'] = GroupUser.objects.get(id=self.kwargs['pk']).profile.full_name
+        context['logged_user'] = self.request.user.profile
+        context['nav_groups'] = Group.objects.filter(profile=self.request.user.profile)[:4]
+        return context
+
+
+@method_decorator(login_required, name='dispatch')
 class ExpenseCreateView(CreateView):
     model = Expense
     form_class = ExpenseForm
