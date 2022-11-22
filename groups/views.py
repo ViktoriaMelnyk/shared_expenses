@@ -100,10 +100,6 @@ class GroupUpdateView(UpdateView):
             raise PermissionDenied("You can't edit this group")
 
         form = super().get_form(*args, **kwargs)
-
-        # limit only to current group users
-        #form.fields['paid_by'].queryset = group_users
-        #form.fields['split_with'].queryset = group_users
         return form
 
     def get_success_url(self):
@@ -176,6 +172,42 @@ class GroupDetailView(DetailView):
         context['custom_range'] = page_range
 
         self.request.session['group_id'] = str(group.id)
+        return context
+
+
+@method_decorator(login_required, name='dispatch')
+class GroupInvite(DetailView):
+    model = Group
+    template_name = 'groups/group_confirm_invite.html'
+
+    def dispatch(self, request, *args, **kwargs):
+        group_id = self.kwargs['pk']
+        group = Group.objects.get(id=group_id)
+
+        # check permission
+        try:
+            GroupUser.objects.get(group=group, profile=self.request.user.profile)
+            raise PermissionDenied("You are already in this group")
+        except GroupUser.DoesNotExist:
+            return super(GroupInvite, self).dispatch(request, *args, **kwargs)
+
+    def post(self, request, **kwargs):
+        group_id = self.kwargs['pk']
+        group = Group.objects.get(id=group_id)
+
+        GroupUser.objects.create(
+            group=group,
+            profile=self.request.user.profile
+        )
+        return HttpResponseRedirect(reverse('detail', args=[str(group.id)]))
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        group = Group.objects.get(id=self.kwargs['pk'])
+        context['group_id'] = group.id
+        context['group_name'] = group.name
+        context['logged_user'] = self.request.user.profile
+        context['nav_groups'] = Group.objects.filter(profile=self.request.user.profile)[:4]
         return context
 
 

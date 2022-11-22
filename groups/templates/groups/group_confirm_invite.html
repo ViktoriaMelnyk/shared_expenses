@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'styles/main.css' %}">
+    <title>Slash</title>
+</head>
+<body>
+    <section class="confirmation">
+        <form class="welcome__wrapper" method="post">
+            <div class="welcome__img" style="background-image: url({% static 'media/Stop.png' %});"></div>
+            {% csrf_token %}
+            <div class="left">
+              <p>You will join "{{group_name}}" group</p>
+            <h1>Are you sure?</h1>
+            <button type="submit" class="custom__btn" style="background: #0BCB2A;">Confirm</button>
+            <a href="{% url 'detail' group_id %}" class="custom__btn" style="background: #F15634;">Reject</a>
+            </div>
+        </form>
+    </section>
+</body>
+</html>

@@ -11,4 +11,5 @@ urlpatterns = [
     path('<str:pk>/', views.GroupDetailView.as_view(), name="detail"),
     path('<str:pk>/delete', views.GroupDeleteView.as_view(), name="delete"),
     path('<str:pk>/edit', views.GroupUpdateView.as_view(), name="edit"),
+    path('<str:pk>/join', views.GroupInvite.as_view(), name="join"),
 ]
