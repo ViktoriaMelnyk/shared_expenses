@@ -44,6 +44,7 @@
                <div class="item__header">
                     <div class="item__header-title">{{group_data.name}}</div>
                     <div class="buttons__box">
+                        <button class="copy-btn" share-link = http://127.0.0.1:8000{{request.get_full_path}}join>Share</button>
                         <button onclick="location.href='{% url 'edit' group.id %}'" type="button">Settings</button>
                         <button onclick="location.href='/group/add-expense/'" type="button">+ Expense</button>
                         <button onclick="location.href='/group/settle-up/'" type="button">Settle Up</button>
