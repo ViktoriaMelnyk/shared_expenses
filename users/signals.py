@@ -11,6 +11,7 @@ def create_profile(sender, instance, created, **kwargs):
             user=user,
             username=user.username,
             email=user.email,
+            full_name=user.username
         )
 
 
