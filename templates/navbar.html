@@ -11,9 +11,12 @@
 
                 <nav class="header__menu">
                 <ul>
-                    <li><a href="{% url 'create' %}" class="custom-icon plus" style="background-image: url({% static 'media/plus.svg' %})"></a></li>
+                    <li>
+
+                        <a href="{% url 'create' %}" class="custom-icon plus" style="background-image: url({% static 'media/plus.svg' %})"></a>
+
+                    </li>
                     <li class="line"></li>
-                    <li><a href="#"class="custom-icon bell"style="background-image: url({% static 'media/bell.svg' %})"><span></span></a></li>
                     <li class="user__box">
                         <div class="user">
                             <div class="custom-icon user__img"style="background-image: url();"></div>

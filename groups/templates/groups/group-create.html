@@ -1,34 +1,34 @@
 {% extends 'main.html' %}
 {% load static %}
 {% block content %}
-
-<section class="main">
+<section class="settle__up">
     <div class="main__wrapper">
-        <div class="main__content">
-
-            <form method="POST" action="" class="form">
+        <form method="POST" class="form settle__up-form" style="background-image: url({% static 'media/settle-up.png' %});">
             {% csrf_token %}
-            <div class="left__content">
-                <div class="form__title">Group</div>
+            <a class="custom-icon exit" href="{% url 'detail' group_id %}" style="background-image: url({% static 'media/x.svg' %});"></a>
+            <div class="form__title">New Group</div>
 
-                <div class="form__item">
 
-                    <div class="form__group">
-                        <label> Name</label>
-                        {{form.name}}
-                    </div>
+
+            <div class="form__item" style="border-bottom: none;">
+                <div class="form__group">
+                    <label for="amount">Name</label>
+                    {{form.name}}
                 </div>
-            </div>
-            <div class="right__content">
-            <button type="submit" class="custom__btn">Submit</button>
-                {% if object %}
-                    <a href="{% url 'delete' group.id %}" class="custom__btn" style="background: #F15634;">Delete</a>
-                {% endif %}
-            </div>
-        </form>
 
-        </div>
+            </div>
+            <div class="btn__box" style="border-bottom: none;">
+            <button type="submit" class="custom__btn" style="margin-top: 40px;">Create</button>
+            {% if object %}
+                    <a href="{% url 'delete' group.id %}" class="custom__btn" style="background: #F15634;">Delete</a>
+            {% endif %}
+                </div>
+
+        </form>
     </div>
+
 </section>
 
 {% endblock %}
+
+

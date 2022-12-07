@@ -8,5 +8,5 @@ copyBtn.forEach(btn=> btn.addEventListener('click', ()=>{
     const share = btn.getAttribute('share-link')
     console.log(share)
     navigator.clipboard.writeText(share)
-    btn.textContent = 'copied'
+    btn.textContent = 'Link copied!'
 }))
