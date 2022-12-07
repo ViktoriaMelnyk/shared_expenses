@@ -187,7 +187,7 @@ class GroupInvite(DetailView):
         # check permission
         try:
             GroupUser.objects.get(group=group, profile=self.request.user.profile)
-            raise PermissionDenied("You are already in this group")
+            return HttpResponseRedirect(reverse('detail', args=[str(group.id)]))
         except GroupUser.DoesNotExist:
             return super(GroupInvite, self).dispatch(request, *args, **kwargs)
 
